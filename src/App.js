@@ -1,6 +1,5 @@
 import React from 'react'
 import {Route, Link} from 'react-router-dom'
-import escapeRegExp from 'escape-string-regexp'
 import sortBy from 'sort-by'
 
 import * as BooksAPI from './BooksAPI'
@@ -11,11 +10,18 @@ import './App.css'
 class BooksApp extends React.Component {
   state = {
     query:'',
-    books:[]
+    books:[],
+    searchBooks:[]
   }
 
   updateQuery = (query) =>{
     this.setState({query: query.trim() })
+    if (this.state.query) {
+      BooksAPI.search(this.state.query,20).then((books) => {
+        books.sort(sortBy('title'))
+        this.setState({searchBooks: books})
+      })
+    } 
   }
 
   onShelfChange(event){
@@ -29,16 +35,6 @@ class BooksApp extends React.Component {
   }
 
   render() {
-
-    let showingBooks
-    if(this.state.query){
-        const match = new RegExp(escapeRegExp(this.state.query),'i')
-        showingBooks = this.state.books.filter((book) => match.test(book.title))
-    } else {
-        showingBooks = this.state.books
-    }
-
-    showingBooks.sort(sortBy('title'))
 
     return (
       <div className="app">
@@ -56,8 +52,7 @@ class BooksApp extends React.Component {
             <div className="search-books-results">
               {this.state.query !== '' && (
                 <ol className="books-grid">
-                  {showingBooks
-                      .map((b)=> (
+                  {this.state.searchBooks.map((b)=> (
                       <li key={b.id} >
                           <div className="book">
                               <div className="book-top">
