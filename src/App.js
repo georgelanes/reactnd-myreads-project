@@ -4,10 +4,12 @@ import sortBy from 'sort-by'
 
 import * as BooksAPI from './BooksAPI'
 import ListBooks from './ListBooks'
+import ListBookItem from './ListBookItem'
 
 import './App.css'
 
 class BooksApp extends React.Component {
+
   state = {
     query:'',
     books:[],
@@ -18,14 +20,26 @@ class BooksApp extends React.Component {
     this.setState({query: query.trim() })
     if (this.state.query) {
       BooksAPI.search(this.state.query,20).then((books) => {
-        books.sort(sortBy('title'))
+        //books.sort(sortBy('title'))
         this.setState({searchBooks: books})
       })
     } 
   }
 
-  onShelfChange(event){
-        console.log(event.target.value)
+  onChange = (event) => {
+        var book=event.target
+        var bookId = book.attributes.getNamedItem('data-id').value
+        console.log("shelf: " + book.value + ", Book Id: " + bookId)
+        var bookUpdate = {
+            id:bookId
+        }
+        
+        BooksAPI.update(bookUpdate,book.value).then((resultBooks) => {
+          BooksAPI.getAll().then((books) => {
+            this.setState({books: books})
+          })
+        })
+
   } 
 
   componentDidMount(){
@@ -51,32 +65,7 @@ class BooksApp extends React.Component {
             </div>
             <div className="search-books-results">
               {this.state.query !== '' && (
-                <ol className="books-grid">
-                  {this.state.searchBooks.map((b)=> (
-                      <li key={b.id} >
-                          <div className="book">
-                              <div className="book-top">
-                              <div className="book-cover" style={{ width: 128, height: 193, backgroundImage:`url(${b.imageLinks.thumbnail})`}}></div>
-                              <div className="book-shelf-changer">
-                                  <select value={b.shelf} onChange={this.onShelfChange}>
-                                      <option value="none" disabled>Move to...</option>
-                                      <option value="currentlyReading">Currently Reading</option>
-                                      <option value="wantToRead">Want to Read</option>
-                                      <option value="read">Read</option>
-                                      <option value="none">None</option>
-                                  </select>
-                              </div>
-                              </div>
-                              <div className="book-title">{b.title}</div>
-                              <div className="book-authors">
-                                  {b.authors.map((a, index) =>(
-                                      <p key={index}>{a}</p>
-                                  ))}
-                              </div>
-                          </div>
-                      </li>
-                  ))}
-                </ol>
+                  <ListBookItem books={this.state.searchBooks} onShelfChange={this.onChange} />
               )}
             </div>
           </div>
@@ -88,9 +77,9 @@ class BooksApp extends React.Component {
               </div>
               <div className="list-books-content">
                 <div>
-                  <ListBooks shelfType="currentlyReading" books={this.state.books}/>
-                  <ListBooks shelfType="wantToRead" books={this.state.books}/>
-                  <ListBooks shelfType="read" books={this.state.books}/>
+                  <ListBooks shelfType="currentlyReading" books={this.state.books}  onShelfChange={this.onChange}/>
+                  <ListBooks shelfType="wantToRead" books={this.state.books}  onShelfChange={this.onChange}/>
+                  <ListBooks shelfType="read" books={this.state.books}  onShelfChange={this.onChange}/>
                 </div>
               </div>
               <div className="open-search">
