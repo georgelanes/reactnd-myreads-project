@@ -9,7 +9,7 @@ import ListBookItem from './ListBookItem'
 import './App.css'
 
 class BooksApp extends React.Component {
-
+  
   state = {
     query:'',
     books:[],
@@ -19,9 +19,19 @@ class BooksApp extends React.Component {
   updateQuery = (query) =>{
     this.setState({query: query.trim() })
     if (this.state.query) {
-      BooksAPI.search(this.state.query,20).then((books) => {
+      BooksAPI.search(this.state.query,20).then((booksResult) => {
         //books.sort(sortBy('title'))
-        this.setState({searchBooks: books})
+        for (var el in booksResult) {
+          let bR = booksResult[el]
+          let book = this.state.books.find(b=> b.id === bR.id)
+          if(book) {
+            console.log(book)
+            bR.shelf = book.shelf
+          } else {
+            bR.shelf = 'none'
+          }
+        }
+        this.setState({searchBooks: booksResult})
       })
     } 
   }
@@ -49,7 +59,7 @@ class BooksApp extends React.Component {
   }
 
   render() {
-
+    const shelfTypes = ['currentlyReading', 'wantToRead', 'read' ];
     return (
       <div className="app">
         <Route exact path="/search" render={() => (
@@ -64,7 +74,7 @@ class BooksApp extends React.Component {
               </div>
             </div>
             <div className="search-books-results">
-              {this.state.query !== '' && (
+              {(this.state.query !== '' && this.state.searchBooks) && (
                   <ListBookItem books={this.state.searchBooks} onShelfChange={this.onChange} />
               )}
             </div>
@@ -77,9 +87,9 @@ class BooksApp extends React.Component {
               </div>
               <div className="list-books-content">
                 <div>
-                  <ListBooks shelfType="currentlyReading" books={this.state.books}  onShelfChange={this.onChange}/>
-                  <ListBooks shelfType="wantToRead" books={this.state.books}  onShelfChange={this.onChange}/>
-                  <ListBooks shelfType="read" books={this.state.books}  onShelfChange={this.onChange}/>
+                  {shelfTypes.map(shelfType => 
+                    <ListBooks key={shelfType}  shelfType={shelfType} books={this.state.books}  onShelfChange={this.onChange}/>
+                  )}
                 </div>
               </div>
               <div className="open-search">

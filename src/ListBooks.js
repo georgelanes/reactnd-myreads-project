@@ -26,7 +26,7 @@ class ListBooks extends Component {
                 title="Read";
                 break;
             default:
-                title="Currently Reading";
+                title="";
         }
 
 
@@ -35,10 +35,12 @@ class ListBooks extends Component {
                 return book.shelf === shelfType})
 
         return (
-            <div className="bookshelf" key={shelfType}>
+            <div className="bookshelf">
                 <h2 className="bookshelf-title">{title}</h2>
                 <div className="bookshelf-books">
-                    <ListBookItem books={listBooks} onShelfChange={onShelfChange} />
+                    {listBooks ? 
+                    <ListBookItem key={shelfType} books={listBooks} onShelfChange={onShelfChange} />
+                    : ''}
                 </div>
             </div>
         )

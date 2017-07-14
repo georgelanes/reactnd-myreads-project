@@ -13,7 +13,7 @@ class ListBookItem extends Component {
 
         return (
             <ol className="books-grid">
-                {books.map((b)=> (
+                {books ? books.map((b)=> (
                     <li key={b.id} >
                         <div className="book">
                             <div className="book-top">
@@ -30,13 +30,13 @@ class ListBookItem extends Component {
                             </div>
                             <div className="book-title">{b.title}</div>
                             <div className="book-authors">
-                                {b.authors.map((a, index) =>(
+                                {b.authors ? b.authors.map((a, index) =>(
                                     <p key={index}>{a}</p>
-                                ))}
+                                )) : 'Unknown'}
                             </div>
                         </div>
                     </li>
-                ))}
+                )) : 'Unknown'}
             </ol>
             
         )
